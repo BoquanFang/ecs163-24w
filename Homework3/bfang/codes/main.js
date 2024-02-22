@@ -23,6 +23,7 @@ let scatterMargin = {top: 10, right: 30, bottom: 30, left: 60},
     scatterHeight = 350 - scatterMargin.top - scatterMargin.bottom;
 
 let colors = [
+
     '#78C850', // Grass
     '#F08030', // Fire
     '#6890F0', // Water
@@ -41,9 +42,11 @@ let colors = [
     '#705848', // Dark
     '#B8B8D0', // Steel
     '#A890F0', // Flying
+
 ];
 
 function processingData(rawData) {
+
     // Data Processing
     allTypeOne = []
     // Transform data to number, string, and boolean values
@@ -63,9 +66,11 @@ function processingData(rawData) {
         d.Height_m = Number(d.Height_m);
         d.Weight_kg = Number(d.Weight_kg);
         d.Catch_Rate = Number(d.Catch_Rate);
+        
         if (!(allTypeOne.includes(d.Type_1))) {
             allTypeOne.push(d.Type_1);
         }
+
     });
 
     // Drop two types that have incomplete and trivial attributes
@@ -121,6 +126,7 @@ d3.csv("../data/pokemon_alopez247.csv").then(rawData => {
     var highlight = function(d){
 
         selected_type = d.Type_1;
+        selected_name = d.Name;
 
         // first every group turns grey
         d3.selectAll(".line")
@@ -139,10 +145,15 @@ d3.csv("../data/pokemon_alopez247.csv").then(rawData => {
             .style("opacity", function(d) {
                 return (d === selected_type) ? "1" : "0.2";
             });
+
+        // Update the selected name text
+        selectedNameText.transition().duration(200).text("Selected Pokemon: " + selected_name);
+
     }
 
     // Unhighlight
     var doNotHighlight = function(d){
+
         d3.selectAll(".line")
             .transition().duration(200).delay(1000)
             .style("stroke", function(d){ return( color(d.Type_1))} )
@@ -151,6 +162,8 @@ d3.csv("../data/pokemon_alopez247.csv").then(rawData => {
         d3.selectAll(".legend-item-graph1")
             .transition().duration(200).delay(1000)
             .style("opacity", "1")
+        
+            selectedNameText.transition().duration(200).delay(1000).text("");
     }
 
     // Draw paths
@@ -195,7 +208,7 @@ d3.csv("../data/pokemon_alopez247.csv").then(rawData => {
     // Add a legend to the side of the parallel coordinates plot
     const legend = svg.append("g")
         .attr("class", "legend")
-        .attr("transform", `translate(${width - 200}, ${height - (parallelHeight + parallelMargin.top + parallelMargin.bottom)})`);
+        .attr("transform", `translate(${width - 250}, ${height - (parallelHeight + parallelMargin.top + parallelMargin.bottom)})`);
 
     const legendRectSize = 18;
     const legendSpacing = 4;
@@ -219,6 +232,13 @@ d3.csv("../data/pokemon_alopez247.csv").then(rawData => {
         .attr("x", legendRectSize + legendSpacing)
         .attr("y", legendRectSize - legendSpacing)
         .text(function (d) { return d; });
+
+    // Add text element to display selected name
+    let selectedNameText = legend.append("text")
+        .attr("x", 0)
+        .attr("y", allTypeOne.length * (legendRectSize + legendSpacing) + 20) // Position at the bottom of the legend
+        .style("font-size", "16px")
+        .style("fill", "black");        
 
 }).catch(function(error){
     console.log(error);
